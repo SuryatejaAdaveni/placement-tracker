@@ -1,0 +1,9 @@
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/placementtraker?createDatabaseIfNotExist=true
+    username: root
+    password: Asurya@2004
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
