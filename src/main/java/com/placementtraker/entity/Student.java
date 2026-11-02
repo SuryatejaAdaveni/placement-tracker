@@ -1,10 +1,14 @@
 package com.placementtraker.entity;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.DecimalMax;
@@ -29,22 +33,10 @@ import lombok.Setter;
 @NoArgsConstructor
 public class Student{
 	
-	@PrePersist
-	public void generateStudentId() {
-		if(studentId==null||studentId.isBlank()) {
-			studentId="STU"+java.util.UUID.randomUUID()
-			.toString()
-			.replace("-", "")
-			.substring(0, 8)
-			.toUpperCase();
-		}
-	}
-	
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
-	
-	private String studentId;
 	
 	@NotBlank(message = "Name is Required")
 	@Size(min = 3, max = 100, message = "Name should be 3-100 charecters between")
@@ -56,7 +48,7 @@ public class Student{
 	@Column(nullable = false, unique = true)
 	private String email;
 	
-	@NotBlank(message = "Phone number is required")
+	@NotNull(message = "Phone number is required")
 	@Pattern(regexp = "^[0-9]{10}$",
 			message = "Phone contains exactly 10 digits")
 	@Column(nullable = false, unique = true)
@@ -82,6 +74,12 @@ public class Student{
 	@Column(nullable = false)
 	private String district;
 	
+	@OneToOne(cascade = CascadeType.ALL)
+	@JoinColumn(name ="std_acdemic_id", unique = true)
+	private StudentAcademicDetails studentAcademicDetails;
 	
+	@OneToMany(cascade = CascadeType.ALL)
+	@JoinColumn(name ="std_mock_rating", unique = true)
+	private MockRating mockRating;
 	
 }
