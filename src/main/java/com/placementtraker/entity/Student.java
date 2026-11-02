@@ -10,6 +10,7 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.Lob;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
@@ -36,7 +37,7 @@ public class Student{
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 	
-	@NotNull(message = "Student Id is required")
+
 	@Column(unique = true, nullable = false, updatable = false)
 	private String studentId;
 	
@@ -78,6 +79,7 @@ public class Student{
 	private String district;
 	
 	@OneToOne(cascade = CascadeType.ALL)
+	@JoinColumn(name = "std_academics", referencedColumnName = "id", nullable = false, unique = true)
 	private StudentAcademicDetails studentAcademicDetails;
 	
 	@OneToMany(mappedBy = "student",
@@ -89,7 +91,7 @@ public class Student{
 	private List<Application> applications = new ArrayList<>();
 	
 	@Lob
-	@Column(name = "resume_file")
+	@Column(name = "resume_file", columnDefinition = "LONGBLOB")
 	private byte[] resumeFile;
 	
 	@PrePersist
