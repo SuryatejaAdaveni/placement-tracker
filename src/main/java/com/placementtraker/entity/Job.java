@@ -72,8 +72,7 @@ public class Job {
 	@FutureOrPresent(message = "Deadline cannot be in the past")
 	@Column(nullable=false)
 	private LocalDate applicationDate;
-	
-	
+
 	
 	@PrePersist
 	public void generateJobId() {

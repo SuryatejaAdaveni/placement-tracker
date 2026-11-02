@@ -6,7 +6,6 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToOne;
-import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
@@ -25,24 +24,11 @@ import lombok.Setter;
 @NoArgsConstructor
 public class StudentAcademicDetails {
 	
-	@PrePersist
-	public void generateStudentId() {
-		if(studentId==null||studentId.isBlank()) {
-			studentId="STU"+java.util.UUID.randomUUID()
-			.toString()
-			.replace("-", "")
-			.substring(0, 8)
-			.toUpperCase();
-		}
-	}
-	
-	@NotNull(message = "Student Id is required")
-	@Column(unique = true, nullable = false, updatable = false)
-	private String studentId;
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
+	
 	
 	@NotNull(message = "CGPA is required")
 	@DecimalMin(value="0.0", message = "CGPA should greater than 0")
