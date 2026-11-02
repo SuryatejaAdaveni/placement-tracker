@@ -1,27 +1,25 @@
 package com.placementtraker.entity;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
+import jakarta.persistence.Lob;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
-import jakarta.validation.constraints.DecimalMax;
-import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
-import lombok.Builder.Default;
-import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -38,6 +36,11 @@ public class Student{
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 	
+	@NotNull(message = "Student Id is required")
+	@Column(unique = true, nullable = false, updatable = false)
+	private String studentId;
+	
+	
 	@NotBlank(message = "Name is Required")
 	@Size(min = 3, max = 100, message = "Name should be 3-100 charecters between")
 	@Column(nullable = false)
@@ -48,11 +51,11 @@ public class Student{
 	@Column(nullable = false, unique = true)
 	private String email;
 	
-	@NotNull(message = "Phone number is required")
+	@NotBlank(message = "Phone number is required")
 	@Pattern(regexp = "^[0-9]{10}$",
 			message = "Phone contains exactly 10 digits")
 	@Column(nullable = false, unique = true)
-	private Long phone;
+	private String phone;
 	
 	@NotBlank(message = "Password is Required")
 	@Size(min = 8, max = 72, message = "Password contains 8-72 charecters ")
@@ -75,11 +78,30 @@ public class Student{
 	private String district;
 	
 	@OneToOne(cascade = CascadeType.ALL)
-	@JoinColumn(name ="std_acdemic_id", unique = true)
 	private StudentAcademicDetails studentAcademicDetails;
 	
-	@OneToMany(cascade = CascadeType.ALL)
-	@JoinColumn(name ="std_mock_rating", unique = true)
-	private MockRating mockRating;
+	@OneToMany(mappedBy = "student",
+			fetch = FetchType.LAZY)
+	private List<MockRating> mockRating = new ArrayList<>();
+	
+	@OneToMany(mappedBy = "student",
+			fetch = FetchType.LAZY)
+	private List<Application> applications = new ArrayList<>();
+	
+	@Lob
+	@Column(name = "resume_file")
+	private byte[] resumeFile;
+	
+	@PrePersist
+	public void generateStudentId() {
+		if(studentId==null||studentId.isBlank()) {
+			studentId="STU"+java.util.UUID.randomUUID()
+			.toString()
+			.replace("-", "")
+			.substring(0, 8)
+			.toUpperCase();
+		}
+	}
+	
 	
 }

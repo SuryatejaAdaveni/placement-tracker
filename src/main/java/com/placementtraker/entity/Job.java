@@ -2,7 +2,9 @@ package com.placementtraker.entity;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import jakarta.persistence.CollectionTable;
@@ -13,6 +15,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.DecimalMin;
@@ -72,8 +75,9 @@ public class Job {
 	@FutureOrPresent(message = "Deadline cannot be in the past")
 	@Column(nullable=false)
 	private LocalDate applicationDate;
-	
-	
+
+	@OneToMany(mappedBy = "job")
+	private List<Application>applications=new ArrayList<>();
 	
 	@PrePersist
 	public void generateJobId() {
