@@ -79,7 +79,7 @@ public class Student{
 	private String district;
 	
 	@OneToOne(cascade = CascadeType.ALL)
-	@JoinColumn(name = "std_academics", referencedColumnName = "id", nullable = false, unique = true)
+	@JoinColumn(name = "student_academic_details_id")
 	private StudentAcademicDetails studentAcademicDetails;
 	
 	@OneToMany(mappedBy = "student",

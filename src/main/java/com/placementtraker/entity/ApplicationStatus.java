@@ -6,5 +6,4 @@ public enum ApplicationStatus {
 	NOT_SELECTED,
 	SELECTED,
 	CONTACTED_BY_EMAIL
-	
 }

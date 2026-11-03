@@ -77,7 +77,7 @@ public class Job {
 	private LocalDate applicationDate;
 
 	@OneToMany(mappedBy = "job")
-	private List<Application>applications=new ArrayList<>();
+	private List<Application> applications=new ArrayList<>();
 	
 	@PrePersist
 	public void generateJobId() {
