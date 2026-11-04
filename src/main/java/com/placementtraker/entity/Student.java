@@ -33,11 +33,11 @@ import lombok.Setter;
 public class Student{
 	
 
-	@Id
+	
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 	
-
+	@Id
 	@Column(unique = true, nullable = false, updatable = false)
 	private String studentId;
 	

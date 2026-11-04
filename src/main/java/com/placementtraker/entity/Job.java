@@ -34,10 +34,10 @@ public class Job {
 	
 	
 	
-	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 	
+	@Id
 	@NotBlank(message = "Job id is Required")
 	@Column(nullable = false, unique = true, updatable = false)
 	private String jobId;
