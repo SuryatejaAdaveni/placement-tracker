@@ -33,11 +33,11 @@ import lombok.Setter;
 public class Student{
 	
 
-	@Id
+	
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 	
-	@NotNull(message = "Student Id is required")
+	@Id
 	@Column(unique = true, nullable = false, updatable = false)
 	private String studentId;
 	
@@ -91,7 +91,7 @@ public class Student{
 	private List<Application> applications = new ArrayList<>();
 	
 	@Lob
-	@Column(name = "resume_file")
+	@Column(name = "resume_file", columnDefinition = "LONGBLOB")
 	private byte[] resumeFile;
 	
 	@PrePersist

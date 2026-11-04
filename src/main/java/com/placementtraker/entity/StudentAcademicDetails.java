@@ -5,6 +5,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.DecimalMax;
@@ -50,7 +51,7 @@ public class StudentAcademicDetails {
 	@Min(value = 0, message = "Backlogs must not be lesser than 0")
 	private Integer backlogs;
 	
-	@NotBlank(message = "Course is required")
+	@NotNull(message = "Course is required")
 	@Column(nullable = false)
 	@DecimalMax(value = "100", message = "percentage must not be greater than 100")
 	@DecimalMin(value = "0.0", message = "percentage must not be lesser than 0.0")
@@ -71,7 +72,7 @@ public class StudentAcademicDetails {
 	@Column(nullable = false)
 	private String branch;
 	
-	@NotBlank(message = "Graduation Year is Required")
+	@NotNull(message = "Graduation Year is Required")
 	@Min(value = 2020, message = "Invalid graduation year")
 	@Max(value = 2027, message = "Invalid graduation year")
 	@Column(nullable = false)
