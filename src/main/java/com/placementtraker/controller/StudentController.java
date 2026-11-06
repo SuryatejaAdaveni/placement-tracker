@@ -18,10 +18,8 @@ import com.placementtraker.service.StudentService;
 import jakarta.validation.Valid;
 
 @RestController
-@RequestMapping("/student")
+@RequestMapping("/api/student")
 public class StudentController {
-	
-	
 	
 	private final StudentService sservice;
 	

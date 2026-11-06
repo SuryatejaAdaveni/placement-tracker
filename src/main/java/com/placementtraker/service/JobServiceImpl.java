@@ -2,9 +2,12 @@ package com.placementtraker.service;
 
 import java.util.List;
 
+import org.springframework.stereotype.Service;
+
 import com.placementtraker.entity.Job;
 import com.placementtraker.repo.JobRepo;
 
+@Service
 public class JobServiceImpl implements JobService {
 	
 	private final JobRepo jrepo;

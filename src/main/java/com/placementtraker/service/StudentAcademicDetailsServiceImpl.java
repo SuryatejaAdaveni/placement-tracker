@@ -2,9 +2,12 @@ package com.placementtraker.service;
 
 import java.util.List;
 
+import org.springframework.stereotype.Service;
+
 import com.placementtraker.entity.StudentAcademicDetails;
 import com.placementtraker.repo.StudentAcademicDetailsRepo;
 
+@Service
 public class StudentAcademicDetailsServiceImpl implements StudentAcademicDetailsService{
 	
 	private final StudentAcademicDetailsRepo srepo;
