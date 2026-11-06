@@ -2,9 +2,12 @@ package com.placementtraker.service;
 
 import java.util.List;
 
+import org.springframework.stereotype.Service;
+
 import com.placementtraker.entity.MockRating;
 import com.placementtraker.repo.MockRatingRepo;
 
+@Service
 public class MockRatingServiceImpl implements MockRatingService {
 	
 	private final MockRatingRepo mrepo;

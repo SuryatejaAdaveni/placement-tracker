@@ -32,10 +32,11 @@ import lombok.Setter;
 			}
 )	
 public class Application {
-	@Id
+	
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Integer id;
 	
+	@Id
 	@Column(nullable = false, unique = true, updatable = false)
 	private String applicationId;
 	
