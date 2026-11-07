@@ -1,4 +1,6 @@
 package com.placementtraker.entity;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -19,7 +21,7 @@ import lombok.Setter;
 @Getter
 public class MockRating {
 	
-	@NotNull
+	
 	@Column(nullable = false)
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -35,6 +37,7 @@ public class MockRating {
 	@Column(nullable = false)
 	private Double rating;
 	
+	@JsonBackReference("student-mockratings")
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "student_id")
 	private Student student;

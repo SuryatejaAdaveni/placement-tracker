@@ -16,8 +16,10 @@ import org.springframework.web.bind.annotation.RestController;
 import com.placementtraker.entity.Job;
 import com.placementtraker.service.JobService;
 
+import jakarta.validation.Valid;
+
 @RestController
-@RequestMapping("/api/job")
+@RequestMapping("/api/drives")
 public class JobController {
 	private final JobService jservice;
 
@@ -25,26 +27,32 @@ public class JobController {
 		super();
 		this.jservice = jservice;
 	}
-	@GetMapping("/jobs")
-	public List<Job> getAllJobs(){
-		return jservice.getAllJobs();
+
+	@GetMapping
+	public ResponseEntity<List<Job>> getAllJobs() {
+		List<Job> jobs = jservice.getAllJobs();
+		return ResponseEntity.ok(jobs);
 	}
-	@GetMapping("/job/{id}")
-	public Job getJobById(@PathVariable String id) {
-		return jservice.getJobById(id);
+
+	@GetMapping("/{id}")
+	public ResponseEntity<Job> getJobById(@PathVariable String id) {
+		return ResponseEntity.ok(jservice.getJobById(id));
 	}
-	@PostMapping("/addJob")
-	public ResponseEntity<String> addJob(@RequestBody Job job){
+
+	@PostMapping("/add")
+	public ResponseEntity<String> addJob(@Valid @RequestBody Job job) {
 		jservice.addJob(job);
 		return new ResponseEntity<>("Job added successfully", HttpStatus.CREATED);
 	}
+
 	@PutMapping("/update/{id}")
-	public ResponseEntity<String> updateJobById(@PathVariable String id, @RequestBody Job job){
+	public ResponseEntity<String> updateJobById(@PathVariable String id,  @Valid @RequestBody Job job) {
 		jservice.updateJobById(id, job);
 		return new ResponseEntity<>("Job updated successfully", HttpStatus.CREATED);
 	}
+
 	@DeleteMapping("/delete/{id}")
-	public ResponseEntity<String> deleteJob(@PathVariable String id){
+	public ResponseEntity<String> deleteJob(@PathVariable String id) {
 		jservice.deleteJobById(id);
 		return new ResponseEntity<>("Job added successfully", HttpStatus.ACCEPTED);
 	}

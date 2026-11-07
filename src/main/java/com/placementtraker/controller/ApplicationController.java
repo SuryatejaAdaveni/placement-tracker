@@ -11,13 +11,16 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.placementtraker.entity.Application;
+import com.placementtraker.entity.ApplicationStatus;
+import com.placementtraker.entity.ForwardingStatus;
 import com.placementtraker.service.ApplicationService;
 
 @RestController
-@RequestMapping("/api/application")
+@RequestMapping("/api/applications")
 public class ApplicationController {
 	private final ApplicationService aservice;
 
@@ -25,29 +28,50 @@ public class ApplicationController {
 		super();
 		this.aservice = aservice;
 	}
-	
-	@GetMapping("/applications")
-	public List<Application> getAllApplications(){
-		return aservice.getAllApplications();
+
+	@GetMapping
+	public ResponseEntity<List<Application>> getAllApplications() {
+		return ResponseEntity.ok(aservice.getAllApplications());
 	}
+
 	@PostMapping("/addApplication")
-	public ResponseEntity<String> addApplication(@RequestBody Application application){
-		aservice.addApplication(application);
-		return new ResponseEntity<>("Application added Successfully", HttpStatus.CREATED);
+	public ResponseEntity<Application> applyForJob(@RequestParam String studentId, @RequestParam String jobId) {
+
+		Application application = aservice.addApplication(studentId, jobId);
+
+		return new ResponseEntity<>(application, HttpStatus.CREATED);
 	}
+
 	@PutMapping("/update/{id}")
-	public ResponseEntity<String> updateApplication(@PathVariable String id, Application application){
+	public ResponseEntity<String> updateApplication(@PathVariable String id, Application application) {
 		aservice.updateApplicationById(id, application);
 		return new ResponseEntity<>("Application updated successfully", HttpStatus.CREATED);
 	}
-	@GetMapping("/application/{id}")
+
+	@GetMapping("/{id}")
 	public Application getApplicationById(@PathVariable String id) {
 		return aservice.getApplicationById(id);
 	}
+
+	// Student views their applications
+	@GetMapping("/student/{studentId}")
+	public ResponseEntity<List<Application>> getApplicationsByStudent(@PathVariable Integer studentId) {
+		return ResponseEntity.ok(aservice.getApplicationsByStudent(studentId));
+	}
+
 	@DeleteMapping("/delete/{id}")
-	public ResponseEntity<String> deleteApplicationById(@PathVariable String id){
+	public ResponseEntity<String> deleteApplicationById(@PathVariable String id) {
 		aservice.deleteApplicationById(id);
 		return new ResponseEntity<>("Application deleted successfully", HttpStatus.ACCEPTED);
 	}
-	
+
+	// Admin updates application status
+	@PutMapping("/{id}/status")
+	public ResponseEntity<Application> updateApplicationStatus(@PathVariable String id,
+			@RequestParam(required = false) ApplicationStatus applicationStatus,
+			@RequestParam(required = false) ForwardingStatus forwardingStatus) {
+
+		return ResponseEntity.ok(aservice.updateApplicationStatus(id, applicationStatus, forwardingStatus));
+	}
+
 }

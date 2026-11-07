@@ -18,7 +18,7 @@ import com.placementtraker.service.StudentService;
 import jakarta.validation.Valid;
 
 @RestController
-@RequestMapping("/api/student")
+@RequestMapping("/api/students")
 public class StudentController {
 	
 	private final StudentService sservice;
@@ -32,7 +32,7 @@ public class StudentController {
 		sservice.addStudent(student);
 		return new ResponseEntity<>("Student Added Successfully",HttpStatus.CREATED);
 	}
-	@GetMapping("/viewStudents")
+	@GetMapping
 	public List<Student> getAllStudents(){
 		return sservice.getAllStudents();
 	}

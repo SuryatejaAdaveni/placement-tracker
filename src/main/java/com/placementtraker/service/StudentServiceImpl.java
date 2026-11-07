@@ -10,7 +10,7 @@ import com.placementtraker.repo.StudentRepo;
 
 @Service
 public class StudentServiceImpl implements StudentService {
-	
+
 	private final StudentRepo srepo;
 
 	public StudentServiceImpl(StudentRepo srepo) {
@@ -26,7 +26,7 @@ public class StudentServiceImpl implements StudentService {
 	@Override
 	public Student updateStudentById(String id, Student currentStudent) {
 		Student updatedStudent = srepo.findById(id).orElse(null);
-		if(updatedStudent!=null) {
+		if (updatedStudent != null) {
 			updatedStudent.setId(currentStudent.getId());
 			updatedStudent.setName(currentStudent.getName());
 			updatedStudent.setPhone(currentStudent.getPhone());
@@ -40,7 +40,7 @@ public class StudentServiceImpl implements StudentService {
 			return srepo.save(updatedStudent);
 		}
 		return null;
-		
+
 	}
 
 	@Override
@@ -56,7 +56,16 @@ public class StudentServiceImpl implements StudentService {
 	@Override
 	public void deleteStudentById(String id) {
 		srepo.deleteById(id);
-		
+
+	}
+
+	@Override
+	public void verifyStudent(String id) {
+		// TODO Auto-generated method stub
+		Student student = srepo.findById(id).orElse(null);
+
+		student.setVerified(true);
+		srepo.save(student);
 	}
 
 }

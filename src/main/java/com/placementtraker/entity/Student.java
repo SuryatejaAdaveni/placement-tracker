@@ -3,6 +3,9 @@ package com.placementtraker.entity;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -30,80 +33,74 @@ import lombok.Setter;
 @Getter
 @Table(name = "std_personal_details")
 @NoArgsConstructor
-public class Student{
-	
+public class Student {
 
-	
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
-	
+
 	@Id
 	@Column(unique = true, nullable = false, updatable = false)
 	private String studentId;
-	
-	
+
 	@NotBlank(message = "Name is Required")
 	@Size(min = 3, max = 100, message = "Name should be 3-100 charecters between")
 	@Column(nullable = false)
 	private String name;
-	
+
 	@NotBlank(message = "Mail is required")
 	@Email(message = "Enter a valid email address")
 	@Column(nullable = false, unique = true)
 	private String email;
-	
+
 	@NotBlank(message = "Phone number is required")
-	@Pattern(regexp = "^[0-9]{10}$",
-			message = "Phone contains exactly 10 digits")
+	@Pattern(regexp = "^[0-9]{10}$", message = "Phone contains exactly 10 digits")
 	@Column(nullable = false, unique = true)
 	private String phone;
-	
+
 	@NotBlank(message = "Password is Required")
 	@Size(min = 8, max = 72, message = "Password contains 8-72 charecters ")
 	@Column(nullable = false)
 	private String password;
-	
+
 	@NotBlank(message = "Country is Required")
 	@Size(min = 2, max = 72, message = "Country contains 8-72 charecters ")
 	@Column(nullable = false)
 	private String country;
-	
+
 	@NotBlank(message = "State is Required")
 	@Size(min = 2, max = 72, message = "State contains 8-72 charecters ")
 	@Column(nullable = false)
 	private String state;
-	
+
 	@NotBlank(message = "District is Required")
 	@Size(min = 2, max = 72, message = "District contains 8-72 charecters ")
 	@Column(nullable = false)
 	private String district;
-	
+
 	@OneToOne(cascade = CascadeType.ALL)
 	@JoinColumn(name = "student_academic_details_id")
 	private StudentAcademicDetails studentAcademicDetails;
-	
-	@OneToMany(mappedBy = "student",
-			fetch = FetchType.LAZY)
+
+	@JsonManagedReference("student-mockratings")
+	@OneToMany(mappedBy = "student", fetch = FetchType.LAZY)
 	private List<MockRating> mockRating = new ArrayList<>();
-	
-	@OneToMany(mappedBy = "student",
-			fetch = FetchType.LAZY)
+
+	@JsonIgnore
+	@OneToMany(mappedBy = "student", fetch = FetchType.LAZY)
 	private List<Application> applications = new ArrayList<>();
-	
+
 	@Lob
 	@Column(name = "resume_file", columnDefinition = "LONGBLOB")
 	private byte[] resumeFile;
-	
+
+	@Column(nullable = false)
+	private boolean verified = false;
+
 	@PrePersist
 	public void generateStudentId() {
-		if(studentId==null||studentId.isBlank()) {
-			studentId="STU"+java.util.UUID.randomUUID()
-			.toString()
-			.replace("-", "")
-			.substring(0, 8)
-			.toUpperCase();
+		if (studentId == null || studentId.isBlank()) {
+			studentId = "STU" + java.util.UUID.randomUUID().toString().replace("-", "").substring(0, 8).toUpperCase();
 		}
 	}
-	
-	
+
 }

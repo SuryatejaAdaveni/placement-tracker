@@ -16,8 +16,10 @@ import org.springframework.web.bind.annotation.RestController;
 import com.placementtraker.entity.MockRating;
 import com.placementtraker.service.MockRatingService;
 
+import jakarta.validation.Valid;
+
 @RestController
-@RequestMapping("/api/mock")
+@RequestMapping("/api/mockrating")
 public class MockController {
 	private final MockRatingService mservice;
 
@@ -25,26 +27,41 @@ public class MockController {
 		super();
 		this.mservice = mservice;
 	}
-	@GetMapping("/mockRatings")
-	public List<MockRating>getAllMocks(){
-		return mservice.getAllMockRatings();
+
+	@GetMapping
+	public ResponseEntity<List<MockRating>> getAllMockRatings() {
+
+		return ResponseEntity.ok(mservice.getAllMockRatings());
 	}
-	@GetMapping("/mockRating/{id}")
+
+	@GetMapping("/{id}")
 	public MockRating getMockRatingById(@PathVariable Integer id) {
 		return mservice.getMockRatingById(id);
 	}
-	@PostMapping("/addMock")
-	public ResponseEntity<String> addMock(@RequestBody MockRating mockRating){
-		mservice.addMockRating(mockRating);
-		return new ResponseEntity<>("Mock rating added Successfully", HttpStatus.CREATED);
+
+	@PostMapping("/add/{studentId}")
+	public ResponseEntity<String> addMock(@Valid @RequestBody MockRating mockRating, @PathVariable String studentId) {
+		mservice.addMockRating(studentId, mockRating);
+		return new ResponseEntity<>("MockRating Saved Successfully", HttpStatus.CREATED);
 	}
-	@PutMapping("/update/{id}")
-	public ResponseEntity<String> updateMockById(@PathVariable Integer id, @RequestBody MockRating mockRating){
+	
+	@GetMapping("/student/{studentId}")
+    public ResponseEntity<List<MockRating>> getMockRatingsByStudent(
+            @PathVariable String studentId) {
+
+        return ResponseEntity.ok(
+                mservice.getMockRatingsByStudent(studentId));
+    }
+
+
+	@PutMapping("/{id}")
+	public ResponseEntity<String> updateMockById(@PathVariable Integer id, @RequestBody MockRating mockRating) {
 		mservice.updateMockRatingById(id, mockRating);
 		return new ResponseEntity<>("Mock updated successfully", HttpStatus.CREATED);
 	}
-	@DeleteMapping("/delete/{id}")
-	public ResponseEntity<String> deleteMockById(@PathVariable Integer id){
+
+	@DeleteMapping("/{id}")
+	public ResponseEntity<String> deleteMockById(@PathVariable Integer id) {
 		mservice.deleteMockRatingById(id);
 		return new ResponseEntity<>("Mock deleted successfully", HttpStatus.ACCEPTED);
 	}
