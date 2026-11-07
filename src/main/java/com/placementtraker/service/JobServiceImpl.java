@@ -26,7 +26,6 @@ public class JobServiceImpl implements JobService {
 		Job updatedJob = jrepo.findById(id).orElse(null);
 		
 		if(updatedJob!=null) {
-			updatedJob.setJobId(currentJob.getJobId());
 			updatedJob.setCompanyName(currentJob.getCompanyName());
 			updatedJob.setApplicationDate(currentJob.getApplicationDate());
 			updatedJob.setEligibleBranches(currentJob.getEligibleBranches());

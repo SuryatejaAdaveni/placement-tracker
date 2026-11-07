@@ -81,11 +81,11 @@ public class Student {
 	private StudentAcademicDetails studentAcademicDetails;
 
 	@JsonManagedReference("student-mockratings")
-	@OneToMany(mappedBy = "student", fetch = FetchType.LAZY)
+	@OneToMany(mappedBy = "student",cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	private List<MockRating> mockRating = new ArrayList<>();
 
 	@JsonIgnore
-	@OneToMany(mappedBy = "student", fetch = FetchType.LAZY)
+	@OneToMany(mappedBy = "student",cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	private List<Application> applications = new ArrayList<>();
 
 	@Lob

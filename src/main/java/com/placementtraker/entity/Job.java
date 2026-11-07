@@ -75,6 +75,7 @@ public class Job {
 	@Column(nullable = false)
 	private LocalDate applicationDate;
 
+	@JsonIgnore
 	@OneToMany(mappedBy = "job")
 	private List<Application> applications = new ArrayList<>();
 
