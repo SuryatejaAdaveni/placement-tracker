@@ -19,7 +19,7 @@ public interface ApplicationService {
 
 
 
-	List<Application> getApplicationsByStudent(Integer studentId);
+	List<Application> getApplicationsByStudent(String studentId);
 
 
 }

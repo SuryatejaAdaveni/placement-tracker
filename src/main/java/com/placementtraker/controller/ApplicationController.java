@@ -55,7 +55,7 @@ public class ApplicationController {
 
 	// Student views their applications
 	@GetMapping("/student/{studentId}")
-	public ResponseEntity<List<Application>> getApplicationsByStudent(@PathVariable Integer studentId) {
+	public ResponseEntity<List<Application>> getApplicationsByStudent(@PathVariable String studentId) {
 		return ResponseEntity.ok(aservice.getApplicationsByStudent(studentId));
 	}
 

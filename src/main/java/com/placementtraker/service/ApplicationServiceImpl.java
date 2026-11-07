@@ -91,7 +91,7 @@ public class ApplicationServiceImpl implements ApplicationService {
 
 	@Override
 	@Transactional
-	public List<Application> getApplicationsByStudent(Integer studentId) {
+	public List<Application> getApplicationsByStudent(String studentId) {
 
 //        if (!srepo.findById(studentId).orElse(null)) {
 //            throw new ResponseStatusException(
