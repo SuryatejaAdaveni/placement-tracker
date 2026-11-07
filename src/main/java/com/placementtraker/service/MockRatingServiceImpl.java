@@ -48,7 +48,7 @@ public class MockRatingServiceImpl implements MockRatingService {
 		if (!srepo.existsById(studentId)) {
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Student not found");
 		}
-		return mrepo.findByStudent_Id(studentId);
+		return mrepo.findByStudent_StudentId(studentId);
 	}
 	
 

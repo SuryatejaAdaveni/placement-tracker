@@ -7,5 +7,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import com.placementtraker.entity.MockRating;
 
 public interface MockRatingRepo extends JpaRepository<MockRating, Integer> {
-	List<MockRating> findByStudent_Id(String studentId);
+	List<MockRating> findByStudent_StudentId(String studentId);
 }

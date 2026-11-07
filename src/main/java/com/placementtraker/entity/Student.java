@@ -35,8 +35,7 @@ import lombok.Setter;
 @NoArgsConstructor
 public class Student {
 
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id;
+
 
 	@Id
 	@Column(unique = true, nullable = false, updatable = false)

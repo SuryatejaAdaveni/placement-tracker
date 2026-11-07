@@ -24,6 +24,7 @@ import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
@@ -35,8 +36,7 @@ import lombok.Setter;
 @Getter
 public class Job {
 
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id;
+	
 
 	@Id
 	@Column(nullable = false, unique = true, updatable = false)
@@ -66,7 +66,7 @@ public class Job {
 
 	@ElementCollection
 	@CollectionTable(name = "job_elgible_branches", joinColumns = @JoinColumn(name = "job_id"))
-	@NotBlank(message = "specifying the branches is required")
+	@NotEmpty(message = "At least one branch is required")
 	@Column(name = "branch_name", nullable = false)
 	private Set<String> eligibleBranches = new HashSet<>();
 

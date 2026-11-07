@@ -27,7 +27,6 @@ public class StudentServiceImpl implements StudentService {
 	public Student updateStudentById(String id, Student currentStudent) {
 		Student updatedStudent = srepo.findById(id).orElse(null);
 		if (updatedStudent != null) {
-			updatedStudent.setId(currentStudent.getId());
 			updatedStudent.setName(currentStudent.getName());
 			updatedStudent.setPhone(currentStudent.getPhone());
 			updatedStudent.setEmail(currentStudent.getEmail());

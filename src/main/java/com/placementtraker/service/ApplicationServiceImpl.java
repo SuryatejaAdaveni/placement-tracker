@@ -100,7 +100,7 @@ public class ApplicationServiceImpl implements ApplicationService {
 //            );
 //        }
 
-		return arepo.findByStudent_Id(studentId);
+		return arepo.findByStudent_StudentId(studentId);
 	}
 
 	// Admin updates application and forwarding statuses

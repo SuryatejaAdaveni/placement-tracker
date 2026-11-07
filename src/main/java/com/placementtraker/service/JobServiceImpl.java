@@ -27,7 +27,6 @@ public class JobServiceImpl implements JobService {
 		
 		if(updatedJob!=null) {
 			updatedJob.setJobId(currentJob.getJobId());
-			updatedJob.setId(currentJob.getId());
 			updatedJob.setCompanyName(currentJob.getCompanyName());
 			updatedJob.setApplicationDate(currentJob.getApplicationDate());
 			updatedJob.setEligibleBranches(currentJob.getEligibleBranches());

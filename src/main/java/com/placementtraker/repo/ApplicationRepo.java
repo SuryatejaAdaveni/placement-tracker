@@ -8,6 +8,6 @@ import com.placementtraker.entity.Application;
 
 public interface ApplicationRepo extends JpaRepository<Application, String>{
 
-	List<Application> findByStudent_Id(Integer studentId);
+	List<Application> findByStudent_StudentId(Integer studentId);
 
 }
