@@ -28,14 +28,13 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+
 @Entity
 @Setter
 @Getter
 @Table(name = "std_personal_details")
 @NoArgsConstructor
 public class Student {
-
-
 
 	@Id
 	@Column(unique = true, nullable = false, updatable = false)
@@ -44,37 +43,37 @@ public class Student {
 	@NotBlank(message = "Name is Required")
 	@Size(min = 3, max = 100, message = "Name should be 3-100 charecters between")
 	@Column(nullable = false)
-	private String name;
+	private String name;//
 
 	@NotBlank(message = "Mail is required")
 	@Email(message = "Enter a valid email address")
 	@Column(nullable = false, unique = true)
-	private String email;
+	private String email;//
 
 	@NotBlank(message = "Phone number is required")
 	@Pattern(regexp = "^[0-9]{10}$", message = "Phone contains exactly 10 digits")
 	@Column(nullable = false, unique = true)
-	private String phone;
+	private String phone;//
 
 	@NotBlank(message = "Password is Required")
 	@Size(min = 8, max = 72, message = "Password contains 8-72 charecters ")
 	@Column(nullable = false)
-	private String password;
+	private String password;//
 
 	@NotBlank(message = "Country is Required")
 	@Size(min = 2, max = 72, message = "Country contains 8-72 charecters ")
 	@Column(nullable = false)
-	private String country;
+	private String country;//
 
 	@NotBlank(message = "State is Required")
 	@Size(min = 2, max = 72, message = "State contains 8-72 charecters ")
 	@Column(nullable = false)
-	private String state;
+	private String state;//
 
 	@NotBlank(message = "District is Required")
 	@Size(min = 2, max = 72, message = "District contains 8-72 charecters ")
 	@Column(nullable = false)
-	private String district;
+	private String district;//
 
 	@OneToOne(cascade = CascadeType.ALL)
 	@JoinColumn(name = "student_academic_details_id")
@@ -87,7 +86,7 @@ public class Student {
 	@JsonIgnore
 	@OneToMany(mappedBy = "student",cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	private List<Application> applications = new ArrayList<>();
-
+	
 	@Lob
 	@Column(name = "resume_file", columnDefinition = "LONGBLOB")
 	private byte[] resumeFile;

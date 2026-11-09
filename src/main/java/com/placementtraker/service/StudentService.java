@@ -2,6 +2,8 @@ package com.placementtraker.service;
 
 import java.util.List;
 
+import org.springframework.web.multipart.MultipartFile;
+
 import com.placementtraker.entity.Student;
 
 public interface StudentService {
@@ -17,5 +19,8 @@ public interface StudentService {
 	void deleteStudentById(String id);
 
 	void verifyStudent(String id);
+	
+
+	Student registerStudent(Student student, MultipartFile resume);
 
 }

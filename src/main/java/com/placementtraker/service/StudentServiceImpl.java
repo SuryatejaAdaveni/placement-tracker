@@ -1,12 +1,18 @@
 package com.placementtraker.service;
 
+import java.io.IOException;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.placementtraker.entity.Student;
 import com.placementtraker.repo.StudentRepo;
+
+import jakarta.transaction.Transactional;
 
 @Service
 public class StudentServiceImpl implements StudentService {
@@ -65,6 +71,30 @@ public class StudentServiceImpl implements StudentService {
 
 		student.setVerified(true);
 		srepo.save(student);
+	}
+	
+	@Override
+	@Transactional
+	public Student registerStudent(Student student, MultipartFile resume) {
+
+		try {
+			if (resume == null || resume.isEmpty()) {
+				throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Resume is required");
+			}
+
+			if (!"application/pdf".equalsIgnoreCase(resume.getContentType())) {
+				throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Only PDF resumes are allowed");
+			}
+
+			student.setResumeFile(resume.getBytes());
+
+			Student savedStudent = srepo.save(student);
+
+			return savedStudent;
+
+		} catch (IOException e) {
+			throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Unable to process resume", e);
+		}
 	}
 
 }
