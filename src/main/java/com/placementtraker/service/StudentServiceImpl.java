@@ -9,6 +9,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
+import com.placementtraker.dto.LoginRequest;
+import com.placementtraker.dto.LoginResponse;
 import com.placementtraker.entity.Student;
 import com.placementtraker.repo.StudentRepo;
 
@@ -42,15 +44,16 @@ public class StudentServiceImpl implements StudentService {
 			updatedStudent.setDistrict(currentStudent.getDistrict());
 			updatedStudent.setResumeFile(currentStudent.getResumeFile());
 			updatedStudent.setPassword(currentStudent.getPassword());
+			updatedStudent.setRole("STUDENT");
 			return srepo.save(updatedStudent);
 		}
 		return null;
-
 	}
+	
 
 	@Override
 	public List<Student> getAllStudents() {
-		return srepo.findAll();
+		return srepo.findByRole("STUDENT");
 	}
 
 	@Override
@@ -95,6 +98,21 @@ public class StudentServiceImpl implements StudentService {
 		} catch (IOException e) {
 			throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Unable to process resume", e);
 		}
+	}
+	
+	@Override
+	public LoginResponse login(LoginRequest request) {
+
+	    Student student = srepo.findByEmail(request.getEmail())
+	            .orElseThrow(() -> new RuntimeException("Invalid email or password"));
+
+	    
+	    return new LoginResponse(
+	            student.getStudentId(),
+	            student.getName(),
+	            student.getEmail(),
+	            student.getRole()
+	    );
 	}
 
 }

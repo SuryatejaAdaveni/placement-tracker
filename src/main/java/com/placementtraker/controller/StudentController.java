@@ -1,9 +1,7 @@
 package com.placementtraker.controller;
 
-import java.io.IOException;
 import java.util.List;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -13,41 +11,23 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
 
 import com.placementtraker.entity.Student;
 import com.placementtraker.service.StudentService;
 
-import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
-import tools.jackson.core.JacksonException;
-import tools.jackson.databind.ObjectMapper;
-
 @RestController
 @RequestMapping("/api/students")
 @CrossOrigin(origins = "http://localhost:5173")
 public class StudentController {
 
 	private final StudentService sservice;
-	private final ObjectMapper objectMapper;
 
-	public StudentController(StudentService sservice, ObjectMapper objectMapper) {
+	public StudentController(StudentService sservice) {
 	    this.sservice = sservice;
-	    this.objectMapper = objectMapper;
 	}
 
-	@PostMapping(value = "/register", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-	public ResponseEntity<String> registerStudent(@RequestPart("student") String studentJson,
-			@RequestPart("resume") MultipartFile resume) throws IOException {
-
-		Student student = objectMapper.readValue(studentJson, Student.class);
-
-		sservice.registerStudent(student, resume);
-
-		return ResponseEntity.status(HttpStatus.CREATED).body("Student Registered Successfully");
-	}
 
 	@GetMapping
 	public ResponseEntity<List<Student>> getAllStudents() {

@@ -93,6 +93,9 @@ public class Student {
 
 	@Column(nullable = false)
 	private boolean verified = false;
+	
+	@Column(nullable = false)
+	private String role = "STUDENT";
 
 	@PrePersist
 	public void generateStudentId() {

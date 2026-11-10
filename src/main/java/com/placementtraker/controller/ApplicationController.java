@@ -36,7 +36,7 @@ public class ApplicationController {
 		return ResponseEntity.ok(aservice.getAllApplications());
 	}
 
-	@PostMapping("/addApplication")
+	@PostMapping("/addapplication")
 	public ResponseEntity<Application> applyForJob(@RequestParam String studentId, @RequestParam String jobId) {
 
 		Application application = aservice.addApplication(studentId, jobId);

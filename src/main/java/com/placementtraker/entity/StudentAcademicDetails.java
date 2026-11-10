@@ -1,5 +1,7 @@
 package com.placementtraker.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -78,6 +80,7 @@ public class StudentAcademicDetails {
 	@Column(nullable = false)
 	private Integer graduationYear;
 	
+	@JsonIgnore
 	@OneToOne(mappedBy = "studentAcademicDetails")
 	private Student student;
 }
