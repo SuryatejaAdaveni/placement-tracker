@@ -1,7 +1,6 @@
 package com.placementtraker.entity;
 
 public enum ForwardingStatus {
-	PENDING,
-	APPROVED,
-	REJECTED
+
+	APPLIED, SHORTLISTED, NOT_SELECTED, SELECTED, CONTACTED_BY_EMAIL
 }

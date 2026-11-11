@@ -43,11 +43,11 @@ public class Application {
 
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false)
-	private ForwardingStatus forwardingStatus = ForwardingStatus.PENDING;
+	private ForwardingStatus forwardingStatus = ForwardingStatus.APPLIED;
 
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false)
-	private ApplicationStatus applicationStatus = ApplicationStatus.APPLIED;
+	private ApplicationStatus applicationStatus = ApplicationStatus.PENDING;
 
 	@PrePersist
 	public void generateApplicationId() {

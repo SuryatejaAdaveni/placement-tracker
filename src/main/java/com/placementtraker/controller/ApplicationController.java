@@ -31,11 +31,6 @@ public class ApplicationController {
 		this.aservice = aservice;
 	}
 
-	@GetMapping
-	public ResponseEntity<List<Application>> getAllApplications() {
-		return ResponseEntity.ok(aservice.getAllApplications());
-	}
-
 	@PostMapping("/addapplication")
 	public ResponseEntity<Application> applyForJob(@RequestParam String studentId, @RequestParam String jobId) {
 
@@ -43,17 +38,13 @@ public class ApplicationController {
 
 		return new ResponseEntity<>(application, HttpStatus.CREATED);
 	}
+	
 
-	@PutMapping("/update/{id}")
-	public ResponseEntity<String> updateApplication(@PathVariable String id, Application application) {
-		aservice.updateApplicationById(id, application);
-		return new ResponseEntity<>("Application updated successfully", HttpStatus.CREATED);
+	@GetMapping
+	public ResponseEntity<List<Application>> getAllApplications() {
+		return ResponseEntity.ok(aservice.getAllApplications());
 	}
 
-	@GetMapping("/{id}")
-	public Application getApplicationById(@PathVariable String id) {
-		return aservice.getApplicationById(id);
-	}
 
 	// Student views their applications
 	@GetMapping("/student/{studentId}")
@@ -61,11 +52,12 @@ public class ApplicationController {
 		return ResponseEntity.ok(aservice.getApplicationsByStudent(studentId));
 	}
 
-	@DeleteMapping("/delete/{id}")
-	public ResponseEntity<String> deleteApplicationById(@PathVariable String id) {
-		aservice.deleteApplicationById(id);
-		return new ResponseEntity<>("Application deleted successfully", HttpStatus.ACCEPTED);
+	
+	@GetMapping("/{id}")
+	public Application getApplicationById(@PathVariable String id) {
+		return aservice.getApplicationById(id);
 	}
+	
 
 	// Admin updates application status
 	@PutMapping("/{id}/status")
@@ -75,5 +67,21 @@ public class ApplicationController {
 
 		return ResponseEntity.ok(aservice.updateApplicationStatus(id, applicationStatus, forwardingStatus));
 	}
+	
+	@PutMapping("/update/{id}")
+	public ResponseEntity<String> updateApplication(@PathVariable String id, Application application) {
+		aservice.updateApplicationById(id, application);
+		return new ResponseEntity<>("Application updated successfully", HttpStatus.CREATED);
+	}
+
+	
+
+
+	@DeleteMapping("/delete/{id}")
+	public ResponseEntity<String> deleteApplicationById(@PathVariable String id) {
+		aservice.deleteApplicationById(id);
+		return new ResponseEntity<>("Application deleted successfully", HttpStatus.ACCEPTED);
+	}
+
 
 }
