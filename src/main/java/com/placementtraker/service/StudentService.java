@@ -22,7 +22,7 @@ public interface StudentService {
 
 	void verifyStudent(String id);
 
-	Student registerStudent(Student student, MultipartFile resume);
+	Student registerStudent(Student student, MultipartFile resume,MultipartFile profilePic);
 
 	LoginResponse login(LoginRequest request);
 

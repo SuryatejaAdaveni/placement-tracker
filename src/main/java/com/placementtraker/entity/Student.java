@@ -87,9 +87,17 @@ public class Student {
 	@OneToMany(mappedBy = "student",cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	private List<Application> applications = new ArrayList<>();
 	
-	@Lob
-	@Column(name = "resume_file", columnDefinition = "LONGBLOB")
-	private byte[] resumeFile;
+	@Column(name = "profile_pic_url", length = 1000)
+	private String profilePicUrl;
+
+	@Column(name = "profile_pic_public_id")
+	private String profilePicPublicId;
+
+	@Column(name = "resume_url", length = 1000)
+	private String resumeUrl;
+
+	@Column(name = "resume_public_id")
+	private String resumePublicId;
 
 	@Column(nullable = false)
 	private boolean verified = false;
