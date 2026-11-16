@@ -17,7 +17,6 @@ import com.placementtraker.service.StudentService;
 
 @RestController
 @RequestMapping("/api/admin/managestudents")
-@CrossOrigin(origins = "http://localhost:5173")
 public class AdminController {
 
 	private final StudentService sservice;
