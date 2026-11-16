@@ -22,7 +22,7 @@ import tools.jackson.databind.ObjectMapper;
 
 @RestController
 @RequestMapping("/api")
-@CrossOrigin(origins = "http://localhost:5173")
+//@CrossOrigin(origins = "http://localhost:5173")
 public class AuthenticationController {
 	
 	private final StudentService sservice;

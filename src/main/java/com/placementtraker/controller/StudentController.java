@@ -19,7 +19,7 @@ import com.placementtraker.service.StudentService;
 import jakarta.validation.Valid;
 @RestController
 @RequestMapping("/api/students")
-@CrossOrigin(origins = "http://localhost:5173")
+//@CrossOrigin(origins = "http://localhost:5173")
 public class StudentController {
 
 	private final StudentService sservice;

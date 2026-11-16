@@ -1,11 +1,12 @@
+
 package com.placementtraker.service;
 
 import java.io.IOException;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -13,106 +14,151 @@ import com.placementtraker.dto.LoginRequest;
 import com.placementtraker.dto.LoginResponse;
 import com.placementtraker.entity.Student;
 import com.placementtraker.repo.StudentRepo;
+import com.placementtraker.security.CustomUserDetails;
+import com.placementtraker.security.JwtService;
 
-import jakarta.transaction.Transactional;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Service
 public class StudentServiceImpl implements StudentService {
 
-	private final StudentRepo srepo;
+    private final StudentRepo srepo;
+    private final PasswordEncoder passwordEncoder;
+    private final AuthenticationManager authenticationManager;
+    private final JwtService jwtService;
 
-	public StudentServiceImpl(StudentRepo srepo) {
-		super();
-		this.srepo = srepo;
-	}
+    public StudentServiceImpl(
+            StudentRepo srepo,
+            PasswordEncoder passwordEncoder,
+            AuthenticationManager authenticationManager,
+            JwtService jwtService) {
 
-	@Override
-	public Student addStudent(Student student) {
-		return srepo.save(student);
-	}
+        this.srepo = srepo;
+        this.passwordEncoder = passwordEncoder;
+        this.authenticationManager = authenticationManager;
+        this.jwtService = jwtService;
+    }
 
-	@Override
-	public Student updateStudentById(String id, Student currentStudent) {
-		Student updatedStudent = srepo.findById(id).orElse(null);
-		if (updatedStudent != null) {
-			updatedStudent.setName(currentStudent.getName());
-			updatedStudent.setPhone(currentStudent.getPhone());
-			updatedStudent.setEmail(currentStudent.getEmail());
-			updatedStudent.setStudentId(currentStudent.getStudentId());
-			updatedStudent.setCountry(currentStudent.getCountry());
-			updatedStudent.setState(currentStudent.getState());
-			updatedStudent.setDistrict(currentStudent.getDistrict());
-			updatedStudent.setResumeFile(currentStudent.getResumeFile());
-			updatedStudent.setPassword(currentStudent.getPassword());
-			updatedStudent.setRole("STUDENT");
-			return srepo.save(updatedStudent);
-		}
-		return null;
-	}
-	
+    @Override
+    public Student addStudent(Student student) {
+        student.setPassword(passwordEncoder.encode(student.getPassword()));
+        student.setRole("STUDENT");
+        student.setVerified(false);
+        return srepo.save(student);
+    }
 
-	@Override
-	public List<Student> getAllStudents() {
-		return srepo.findByRole("STUDENT");
-	}
+    @Override
+    public Student updateStudentById(String studentId, Student currentStudent) {
 
-	@Override
-	public Student getStudentById(String id) {
-		return srepo.findById(id).orElse(null);
-	}
+        Student existing = srepo.findByStudentId(studentId)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "Student not found"));
 
-	@Override
-	public void deleteStudentById(String id) {
-		srepo.deleteById(id);
+        existing.setName(currentStudent.getName());
+        existing.setPhone(currentStudent.getPhone());
+        existing.setEmail(currentStudent.getEmail());
+        existing.setCountry(currentStudent.getCountry());
+        existing.setState(currentStudent.getState());
+        existing.setDistrict(currentStudent.getDistrict());
 
-	}
+        // Only replace resume if a new one was supplied
+        if (currentStudent.getResumeFile() != null
+                && currentStudent.getResumeFile().length > 0) {
+            existing.setResumeFile(currentStudent.getResumeFile());
+        }
 
-	@Override
-	public void verifyStudent(String id) {
-		// TODO Auto-generated method stub
-		Student student = srepo.findById(id).orElse(null);
+        // Do not update studentId, role or verified from request.
+        // Password changes should use a separate, validated method.
 
-		student.setVerified(true);
-		srepo.save(student);
-	}
-	
-	@Override
-	@Transactional
-	public Student registerStudent(Student student, MultipartFile resume) {
+        return srepo.save(existing);
+    }
 
-		try {
-			if (resume == null || resume.isEmpty()) {
-				throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Resume is required");
-			}
+    @Override
+    public List<Student> getAllStudents() {
+        return srepo.findByRole("STUDENT");
+    }
 
-			if (!"application/pdf".equalsIgnoreCase(resume.getContentType())) {
-				throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Only PDF resumes are allowed");
-			}
+    @Override
+    public Student getStudentById(String studentId) {
+        return srepo.findByStudentId(studentId)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "Student not found"));
+    }
 
-			student.setResumeFile(resume.getBytes());
+    @Override
+    public void deleteStudentById(String studentId) {
 
-			Student savedStudent = srepo.save(student);
+        Student student = srepo.findByStudentId(studentId)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "Student not found"));
 
-			return savedStudent;
+        srepo.delete(student);
+    }
 
-		} catch (IOException e) {
-			throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Unable to process resume", e);
-		}
-	}
-	
-	@Override
-	public LoginResponse login(LoginRequest request) {
+    @Override
+    public void verifyStudent(String studentId) {
 
-	    Student student = srepo.findByEmail(request.getEmail())
-	            .orElseThrow(() -> new RuntimeException("Invalid email or password"));
+        Student student = srepo.findByStudentId(studentId)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "Student not found"));
 
-	    
-	    return new LoginResponse(
-	            student.getStudentId(),
-	            student.getName(),
-	            student.getEmail(),
-	            student.getRole()
-	    );
-	}
+        student.setVerified(true);
+        srepo.save(student);
+    }
 
+    @Override
+    @Transactional
+    public Student registerStudent(Student student, MultipartFile resume) {
+
+        try {
+            if (resume == null || resume.isEmpty()) {
+                throw new ResponseStatusException(
+                        HttpStatus.BAD_REQUEST, "Resume is required");
+            }
+
+            if (!"application/pdf".equalsIgnoreCase(resume.getContentType())) {
+                throw new ResponseStatusException(
+                        HttpStatus.BAD_REQUEST, "Only PDF resumes are allowed");
+            }
+
+            student.setResumeFile(resume.getBytes());
+            student.setRole("STUDENT");
+            student.setVerified(false);
+            student.setPassword(passwordEncoder.encode(student.getPassword()));
+
+            return srepo.save(student);
+
+        } catch (IOException e) {
+            throw new ResponseStatusException(
+                    HttpStatus.INTERNAL_SERVER_ERROR,
+                    "Unable to process resume", e);
+        }
+    }
+
+    @Override
+    public LoginResponse login(LoginRequest request) {
+
+        Authentication authentication =
+                authenticationManager.authenticate(
+                        new UsernamePasswordAuthenticationToken(
+                                request.getEmail(),
+                                request.getPassword()));
+
+        CustomUserDetails userDetails =
+                (CustomUserDetails) authentication.getPrincipal();
+
+        Student student = userDetails.getStudent();
+
+        String token = jwtService.generateToken(userDetails);
+
+        return new LoginResponse(
+                student.getStudentId(),
+                student.getName(),
+                student.getEmail(),
+                student.getRole(),
+                token);
+    }
 }

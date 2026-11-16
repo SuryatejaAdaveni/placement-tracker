@@ -22,16 +22,14 @@ import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.FutureOrPresent;
-import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 
 @Entity
-@Table(name = "JOB")
+@Table(name = "job")
 @Setter
 @Getter
 public class Job {
@@ -39,6 +37,9 @@ public class Job {
 	
 
 	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
+
 	@Column(nullable = false, unique = true, updatable = false)
 	private String jobId;
 
@@ -65,11 +66,14 @@ public class Job {
 	private String criteria;
 
 	@ElementCollection
-	@CollectionTable(name = "job_elgible_branches", joinColumns = @JoinColumn(name = "job_id"))
-	@NotEmpty(message = "At least one branch is required")
+	@CollectionTable(
+	    name = "job_elgible_branches",
+	    joinColumns = @JoinColumn(name = "job_id")
+	)
 	@Column(name = "branch_name", nullable = false)
 	private Set<String> eligibleBranches = new HashSet<>();
-
+	
+	
 	@NotNull(message = "application date is required")
 	@FutureOrPresent(message = "Deadline cannot be in the past")
 	@Column(nullable = false)
