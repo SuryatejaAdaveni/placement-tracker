@@ -14,16 +14,29 @@ import com.placementtraker.repo.JobRepo;
 public class JobServiceImpl implements JobService {
 
     private final JobRepo jrepo;
+    private final NotificationService nservice;
 
-    public JobServiceImpl(JobRepo jrepo) {
+    public JobServiceImpl(
+            JobRepo jrepo,
+            NotificationService nservice) {
+
         this.jrepo = jrepo;
+        this.nservice = nservice;
     }
 
+    // Admin creates a new placement drive
     @Override
     public Job addJob(Job job) {
-        return jrepo.save(job);
+
+        Job savedJob = jrepo.save(job);
+
+        // Notify students about the new drive
+        nservice.addDriveNotification(savedJob);
+
+        return savedJob;
     }
 
+    // Admin updates a placement drive
     @Override
     public Job updateJobById(String jobId, Job currentJob) {
 
@@ -42,18 +55,22 @@ public class JobServiceImpl implements JobService {
         return jrepo.save(existingJob);
     }
 
+    // Get all placement drives
     @Override
     public List<Job> getAllJobs() {
         return jrepo.findAll();
     }
 
+    // Get a placement drive using its business ID
     @Override
     public Job getJobById(String jobId) {
+
         return jrepo.findByJobId(jobId)
                 .orElseThrow(() -> new ResponseStatusException(
                         HttpStatus.NOT_FOUND, "Job not found"));
     }
 
+    // Delete a placement drive using its business ID
     @Override
     public void deleteJobById(String jobId) {
 

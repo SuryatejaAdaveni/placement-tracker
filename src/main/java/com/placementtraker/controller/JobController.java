@@ -44,6 +44,7 @@ public class JobController {
 	@PostMapping("/add")
 	public ResponseEntity<String> addJob(@Valid @RequestBody Job job) {
 		jservice.addJob(job);
+		
 		return new ResponseEntity<>("Job added successfully", HttpStatus.CREATED);
 	}
 

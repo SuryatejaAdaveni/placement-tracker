@@ -24,40 +24,41 @@ import tools.jackson.databind.ObjectMapper;
 @RequestMapping("/api")
 //@CrossOrigin(origins = "http://localhost:5173")
 public class AuthenticationController {
-	
-	private final StudentService sservice;
-	private final ObjectMapper objectMapper;
 
-	public AuthenticationController(StudentService sservice, ObjectMapper objectMapper) {
-	    this.sservice = sservice;
-	    this.objectMapper = objectMapper;
+	private final StudentService sservice;
+	
+
+	public AuthenticationController(StudentService sservice) {
+		this.sservice = sservice;
 	}
 
 	@PostMapping(value = "/register", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-	public ResponseEntity<String> registerStudent(@RequestPart("student") String studentJson,
-			@RequestPart("resume") MultipartFile resume) throws IOException {
+	public ResponseEntity<Student> registerStudent
+	(
+	@RequestPart("student") Student student,
+	@RequestPart("resume") MultipartFile resume,
+	@RequestPart(value = "profilePic", required = false) MultipartFile profilePic
+	) throws IOException {
 
-		Student student = objectMapper.readValue(studentJson, Student.class);
+		Student savedStudent = sservice.registerStudent(
+		        student, resume, profilePic
+		    );
 
-		sservice.registerStudent(student, resume);
-
-		return ResponseEntity.status(HttpStatus.CREATED).body("Student Registered Successfully");
+		    return ResponseEntity.status(HttpStatus.CREATED).body(savedStudent);
 	}
-	
-	
+
 	@PostMapping("/login")
 	public ResponseEntity<?> login(@RequestBody LoginRequest request) {
 
-	    try {
-	        LoginResponse response = sservice.login(request);
+		try {
+			LoginResponse response = sservice.login(request);
 
-	        return ResponseEntity.ok(response);
+			return ResponseEntity.ok(response);
 
-	    } catch (RuntimeException e) {
+		} catch (RuntimeException e) {
 
-	        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-	                .body(e.getMessage());
-	    }
+			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
+		}
 	}
-	
+
 }

@@ -25,15 +25,18 @@ public class ApplicationServiceImpl implements ApplicationService {
     private final ApplicationRepo arepo;
     private final StudentRepo srepo;
     private final JobRepo jrepo;
+    private final NotificationService nservice;
 
     public ApplicationServiceImpl(
             ApplicationRepo arepo,
             StudentRepo srepo,
-            JobRepo jrepo) {
+            JobRepo jrepo,
+            NotificationService nservice) {
 
         this.arepo = arepo;
         this.srepo = srepo;
         this.jrepo = jrepo;
+        this.nservice = nservice;
     }
 
     // Student applies for a job
@@ -50,7 +53,8 @@ public class ApplicationServiceImpl implements ApplicationService {
 
         // Prevent duplicate applications
         boolean alreadyApplied =
-                arepo.existsByJob_IdAndStudent_Id(job.getId(), student.getId());
+                arepo.existsByJob_IdAndStudent_Id(
+                        job.getId(), student.getId());
 
         if (alreadyApplied) {
             throw new ResponseStatusException(
@@ -62,7 +66,15 @@ public class ApplicationServiceImpl implements ApplicationService {
         application.setStudent(student);
         application.setJob(job);
 
-        return arepo.save(application);
+        Application savedApplication = arepo.save(application);
+
+        // Notify admins
+        nservice.addStudentApplicationNotification(savedApplication);
+
+        // Notify the student
+        nservice.addStudentApplicationNotificationForStudent(savedApplication);
+
+        return savedApplication;
     }
 
     // Admin gets all applications
@@ -116,11 +128,11 @@ public class ApplicationServiceImpl implements ApplicationService {
     @Override
     public List<Application> getApplicationsByStudent(String studentId) {
 
-    	if (!srepo.existsByStudentId(studentId)) {
-    	    throw new ResponseStatusException(
-    	            HttpStatus.NOT_FOUND,
-    	            "Student not found");
-    	}
+        if (!srepo.existsByStudentId(studentId)) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND,
+                    "Student not found");
+        }
 
         return arepo.findByStudent_StudentId(studentId);
     }
@@ -144,6 +156,11 @@ public class ApplicationServiceImpl implements ApplicationService {
             application.setForwardingStatus(forwardingStatus);
         }
 
-        return arepo.save(application);
+        Application updatedApplication = arepo.save(application);
+
+        // Notify the student about the status update
+        nservice.addApplicationStatusNotification(updatedApplication);
+
+        return updatedApplication;
     }
 }
