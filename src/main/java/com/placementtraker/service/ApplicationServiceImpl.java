@@ -1,3 +1,4 @@
+
 package com.placementtraker.service;
 
 import java.util.List;
@@ -21,110 +22,145 @@ import jakarta.transaction.Transactional;
 @Transactional
 public class ApplicationServiceImpl implements ApplicationService {
 
-	private final ApplicationRepo arepo;
-	private final StudentRepo srepo;
-	private final JobRepo jrepo;
-	private final NotificationService nservice;
+    private final ApplicationRepo arepo;
+    private final StudentRepo srepo;
+    private final JobRepo jrepo;
+    private final NotificationService nservice;
 
-	public ApplicationServiceImpl(ApplicationRepo arepo, StudentRepo srepo, JobRepo jrepo,NotificationService nservice) {
+    public ApplicationServiceImpl(
+            ApplicationRepo arepo,
+            StudentRepo srepo,
+            JobRepo jrepo,
+            NotificationService nservice) {
 
-		this.arepo = arepo;
-		this.srepo = srepo;
-		this.jrepo = jrepo;
-		this.nservice = nservice;
-	}
+        this.arepo = arepo;
+        this.srepo = srepo;
+        this.jrepo = jrepo;
+        this.nservice = nservice;
+    }
 
-//  student adding and application for the job
-	@Override
-	public Application addApplication(String studentId, String jobId) {
+    // Student applies for a job
+    @Override
+    public Application addApplication(String studentId, String jobId) {
 
-		Student student = srepo.findById(studentId)
-				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Student not found"));
+        Student student = srepo.findByStudentId(studentId)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "Student not found"));
 
-		Job job = jrepo.findById(jobId)
-				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Placement drive not found"));
+        Job job = jrepo.findByJobId(jobId)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "Placement drive not found"));
 
-		
+        // Prevent duplicate applications
+        boolean alreadyApplied =
+                arepo.existsByJob_IdAndStudent_Id(
+                        job.getId(), student.getId());
 
-		Application application = new Application();
+        if (alreadyApplied) {
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "You have already applied for this job");
+        }
 
-		application.setStudent(student);
-		application.setJob(job);
+        Application application = new Application();
+        application.setStudent(student);
+        application.setJob(job);
 
-		Application savedApplication = arepo.save(application);
+        Application savedApplication = arepo.save(application);
 
-		nservice.addStudentApplicationNotification(savedApplication);
+        // Notify admins
+        nservice.addStudentApplicationNotification(savedApplication);
 
-		nservice.addStudentApplicationNotificationForStudent(savedApplication);
+        // Notify the student
+        nservice.addStudentApplicationNotificationForStudent(savedApplication);
 
-		return savedApplication;
-	}
+        return savedApplication;
+    }
 
-	@Override
-    @Transactional
+    // Admin gets all applications
+    @Override
     public List<Application> getAllApplications() {
-
         return arepo.findAll();
     }
 
-	@Override
-	public Application getApplicationById(String Id) {
-		return arepo.findById(Id).orElse(null);
-	}
+    // Find application using its business ID
+    @Override
+    public Application getApplicationById(String applicationId) {
 
-	@Override
-	public Application updateApplicationById(String Id, Application application) {
+        return arepo.findByApplicationId(applicationId)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "Application not found"));
+    }
 
-		Application updatedApplication = arepo.findById(Id).orElse(null);
-		if (updatedApplication != null) {
-			updatedApplication.setApplicationId(application.getApplicationId());
-			updatedApplication.setApplicationStatus(application.getApplicationStatus());
-			updatedApplication.setForwardingStatus(application.getForwardingStatus());
-			return arepo.save(application);
-		}
-		return null;
+    // Update application
+    @Override
+    public Application updateApplicationById(
+            String applicationId,
+            Application request) {
 
-	}
+        Application existing = arepo.findByApplicationId(applicationId)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "Application not found"));
 
-	@Override
-	public void deleteApplicationById(String id) {
-		arepo.deleteById(id);
-	}
+        if (request.getApplicationStatus() != null) {
+            existing.setApplicationStatus(request.getApplicationStatus());
+        }
 
-	@Override
-	@Transactional
-	public List<Application> getApplicationsByStudent(String studentId) {
+        if (request.getForwardingStatus() != null) {
+            existing.setForwardingStatus(request.getForwardingStatus());
+        }
 
-//        if (!srepo.findById(studentId).orElse(null)) {
-//            throw new ResponseStatusException(
-//                    HttpStatus.NOT_FOUND,
-//                    "Student not found"
-//            );
-//        }
+        return arepo.save(existing);
+    }
 
-		return arepo.findByStudent_StudentId(studentId);
-	}
+    // Delete application using business ID
+    @Override
+    public void deleteApplicationById(String applicationId) {
 
-	// Admin updates application and forwarding statuses
-	@Override
-	public Application updateApplicationStatus(String id, ApplicationStatus applicationStatus,
-			ForwardingStatus forwardingStatus) {
+        Application application = arepo.findByApplicationId(applicationId)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "Application not found"));
 
-		Application application = arepo.findById(id)
-				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Application not found"));
+        arepo.delete(application);
+    }
 
-		if (applicationStatus != null) {
-			application.setApplicationStatus(applicationStatus);
-		}
+    // Get applications belonging to a student
+    @Override
+    public List<Application> getApplicationsByStudent(String studentId) {
 
-		if (forwardingStatus != null) {
-			application.setForwardingStatus(forwardingStatus);
-		}
-		
-		Application updatedApplication = arepo.save(application);
+        if (!srepo.existsByStudentId(studentId)) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND,
+                    "Student not found");
+        }
 
-		nservice.addApplicationStatusNotification(updatedApplication);
+        return arepo.findByStudent_StudentId(studentId);
+    }
 
-		return updatedApplication;
-	}
+    // Admin updates application and forwarding statuses
+    @Override
+    public Application updateApplicationStatus(
+            String applicationId,
+            ApplicationStatus applicationStatus,
+            ForwardingStatus forwardingStatus) {
+
+        Application application = arepo.findByApplicationId(applicationId)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "Application not found"));
+
+        if (applicationStatus != null) {
+            application.setApplicationStatus(applicationStatus);
+        }
+
+        if (forwardingStatus != null) {
+            application.setForwardingStatus(forwardingStatus);
+        }
+
+        Application updatedApplication = arepo.save(application);
+
+        // Notify the student about the status update
+        nservice.addApplicationStatusNotification(updatedApplication);
+
+        return updatedApplication;
+    }
 }

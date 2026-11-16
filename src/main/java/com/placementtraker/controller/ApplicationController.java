@@ -22,7 +22,7 @@ import com.placementtraker.service.ApplicationService;
 
 @RestController
 @RequestMapping("/api/applications")
-@CrossOrigin(origins = "http://localhost:5173")
+//@CrossOrigin(origins = "http://localhost:5173")
 public class ApplicationController {
 	private final ApplicationService aservice;
 

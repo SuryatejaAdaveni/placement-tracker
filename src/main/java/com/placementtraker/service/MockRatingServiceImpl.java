@@ -27,9 +27,10 @@ public class MockRatingServiceImpl implements MockRatingService {
 	public MockRating addMockRating(String studentId, MockRating mockRating) {
 		// TODO Auto-generated method stub
 
-		Student student = srepo.findById(studentId)
-				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Student not found"));
-
+		Student student = srepo.findByStudentId(studentId)
+		        .orElseThrow(() -> new ResponseStatusException(
+		                HttpStatus.NOT_FOUND,
+		                "Student not found"));
 		mockRating.setStudent(student);
 
 		return mrepo.save(mockRating);
@@ -45,7 +46,7 @@ public class MockRatingServiceImpl implements MockRatingService {
 	
 	@Override
 	public List<MockRating> getMockRatingsByStudent(String studentId) {
-		if (!srepo.existsById(studentId)) {
+		if (!srepo.existsByStudentId(studentId)) {
 			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Student not found");
 		}
 		return mrepo.findByStudent_StudentId(studentId);

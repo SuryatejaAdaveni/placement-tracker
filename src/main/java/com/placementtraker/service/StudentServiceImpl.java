@@ -1,146 +1,192 @@
+
 package com.placementtraker.service;
 
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.placementtraker.dto.LoginRequest;
 import com.placementtraker.dto.LoginResponse;
-import com.placementtraker.entity.Role;
 import com.placementtraker.entity.Student;
 import com.placementtraker.repo.StudentRepo;
+import com.placementtraker.security.CustomUserDetails;
+import com.placementtraker.security.JwtService;
 
-import jakarta.transaction.Transactional;
-import tools.jackson.databind.ObjectMapper;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Service
 public class StudentServiceImpl implements StudentService {
 
-	private final StudentRepo srepo;
-	private final CloudinaryService cloudinaryService;
-	private final NotificationService nservice;
-	public StudentServiceImpl(StudentRepo studentRepo, CloudinaryService cloudinaryService,NotificationService nservice) {
+    private final StudentRepo srepo;
+    private final PasswordEncoder passwordEncoder;
+    private final AuthenticationManager authenticationManager;
+    private final JwtService jwtService;
+    private final CloudinaryService cloudinaryService;
+    private final NotificationService nservice;
 
-		this.srepo = studentRepo;
-		this.nservice = nservice;
-		this.cloudinaryService = cloudinaryService;
-	}
+    public StudentServiceImpl(
+            StudentRepo srepo,
+            PasswordEncoder passwordEncoder,
+            AuthenticationManager authenticationManager,
+            JwtService jwtService,
+            CloudinaryService cloudinaryService,
+            NotificationService nservice) {
 
-	@Override
-	public Student addStudent(Student student) {
-		return srepo.save(student);
-	}
+        this.srepo = srepo;
+        this.passwordEncoder = passwordEncoder;
+        this.authenticationManager = authenticationManager;
+        this.jwtService = jwtService;
+        this.cloudinaryService = cloudinaryService;
+        this.nservice = nservice;
+    }
 
-	@Override
-	public Student updateStudentById(String id, Student currentStudent) {
-		Student updatedStudent = srepo.findById(id).orElse(null);
-		if (updatedStudent != null) {
-			updatedStudent.setName(currentStudent.getName());
-			updatedStudent.setPhone(currentStudent.getPhone());
-			updatedStudent.setEmail(currentStudent.getEmail());
-			updatedStudent.setStudentId(currentStudent.getStudentId());
-			updatedStudent.setCountry(currentStudent.getCountry());
-			updatedStudent.setState(currentStudent.getState());
-			updatedStudent.setDistrict(currentStudent.getDistrict());
-//			updatedStudent.setResumeFile(currentStudent.getResumeFile());
-			updatedStudent.setPassword(currentStudent.getPassword());
-			updatedStudent.setRole("STUDENT");
-			return srepo.save(updatedStudent);
-		}
-		return null;
-	}
+    @Override
+    public Student addStudent(Student student) {
+        student.setPassword(passwordEncoder.encode(student.getPassword()));
+        student.setRole("STUDENT");
+        student.setVerified(false);
 
-	@Override
-	public List<Student> getAllStudents() {
-		return srepo.findByRole("STUDENT");
-	}
+        return srepo.save(student);
+    }
 
-	@Override
-	public Student getStudentById(String id) {
-		return srepo.findById(id).orElse(null);
-	}
+    @Override
+    public Student updateStudentById(String studentId, Student currentStudent) {
 
-	@Override
-	public void deleteStudentById(String id) {
-		srepo.deleteById(id);
+        Student existing = srepo.findByStudentId(studentId)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "Student not found"));
 
-	}
+        existing.setName(currentStudent.getName());
+        existing.setPhone(currentStudent.getPhone());
+        existing.setEmail(currentStudent.getEmail());
+        existing.setCountry(currentStudent.getCountry());
+        existing.setState(currentStudent.getState());
+        existing.setDistrict(currentStudent.getDistrict());
 
-	@Override
-	public void verifyStudent(String id) {
-		// TODO Auto-generated method stub
-		Student student = srepo.findById(id).orElse(null);
+        // Do not allow normal profile updates to change:
+        // studentId, password, role, or verification status.
 
-		student.setVerified(true);
-		srepo.save(student);
-	}
+        return srepo.save(existing);
+    }
 
-	@Override
-	public LoginResponse login(LoginRequest request) {
+    @Override
+    public List<Student> getAllStudents() {
+        return srepo.findByRole("STUDENT");
+    }
 
-		Student student = srepo.findByEmail(request.getEmail())
-				.orElseThrow(() -> new RuntimeException("Invalid Email"));
-		
-		if (!student.getPassword().equals(request.getPassword())) {
-		    throw new RuntimeException("Invalid Password");
-		}
+    @Override
+    public Student getStudentById(String studentId) {
+        return srepo.findByStudentId(studentId)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "Student not found"));
+    }
 
-		return new LoginResponse(student.getStudentId(), student.getName(), student.getEmail(), student.getRole());
-	}
+    @Override
+    @Transactional
+    public void deleteStudentById(String studentId) {
 
-	@Override
-	@Transactional
-	public Student registerStudent(
-	        Student student,
-	        MultipartFile resume,
-	        MultipartFile profilePic) {
+        Student student = srepo.findByStudentId(studentId)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "Student not found"));
 
-	    try {
-	        if (resume == null || resume.isEmpty()) {
-	            throw new ResponseStatusException(
-	                HttpStatus.BAD_REQUEST, "Resume is required"
-	            );
-	        }
+        // JPA cascade rules on Student relationships apply here.
+        srepo.delete(student);
+    }
 
-	        if (!"application/pdf".equalsIgnoreCase(resume.getContentType())) {
-	            throw new ResponseStatusException(
-	                HttpStatus.BAD_REQUEST, "Only PDF resumes are allowed"
-	            );
-	        }
+    @Override
+    public void verifyStudent(String studentId) {
 
-	        // Upload resume to Cloudinary
-	        Map resumeResult = cloudinaryService.uploadResume(resume);
+        Student student = srepo.findByStudentId(studentId)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "Student not found"));
 
-	        student.setResumeUrl((String) resumeResult.get("secure_url"));
-	        student.setResumePublicId((String) resumeResult.get("public_id"));
+        student.setVerified(true);
+        srepo.save(student);
+    }
 
-	        // Upload profile picture if provided
-	        if (profilePic != null && !profilePic.isEmpty()) {
+    @Override
+    @Transactional
+    public Student registerStudent(
+            Student student,
+            MultipartFile resume,
+            MultipartFile profilePic) {
 
-	            Map profileResult = cloudinaryService.uploadImage(profilePic);
+        try {
+            if (resume == null || resume.isEmpty()) {
+                throw new ResponseStatusException(
+                        HttpStatus.BAD_REQUEST, "Resume is required");
+            }
 
-	            student.setProfilePicUrl((String) profileResult.get("secure_url"));
-	            student.setProfilePicPublicId((String) profileResult.get("public_id"));
-	        }
+            if (!"application/pdf".equalsIgnoreCase(resume.getContentType())) {
+                throw new ResponseStatusException(
+                        HttpStatus.BAD_REQUEST, "Only PDF resumes are allowed");
+            }
 
-	        Student savedStudent = srepo.save(student);
-	        
-	        nservice.addStudentRegistrationNotification(savedStudent);
+            // Upload resume to Cloudinary.
+            Map resumeResult = cloudinaryService.uploadResume(resume);
 
-	        return savedStudent;
+            student.setResumeUrl((String) resumeResult.get("secure_url"));
+            student.setResumePublicId((String) resumeResult.get("public_id"));
 
-	    } catch (IOException e) {
-	        throw new ResponseStatusException(
-	            HttpStatus.INTERNAL_SERVER_ERROR,
-	            "Unable to upload files",
-	            e
-	        );
-	    }
-	}
+            // Upload profile picture only when one is provided.
+            if (profilePic != null && !profilePic.isEmpty()) {
+
+                Map profileResult = cloudinaryService.uploadImage(profilePic);
+
+                student.setProfilePicUrl((String) profileResult.get("secure_url"));
+                student.setProfilePicPublicId((String) profileResult.get("public_id"));
+            }
+
+            // Always assign the role and verification status on the server.
+            student.setRole("STUDENT");
+            student.setVerified(false);
+            student.setPassword(passwordEncoder.encode(student.getPassword()));
+
+            Student savedStudent = srepo.save(student);
+
+            // Notify admins about the new student registration.
+            nservice.addStudentRegistrationNotification(savedStudent);
+
+            return savedStudent;
+
+        } catch (IOException e) {
+            throw new ResponseStatusException(
+                    HttpStatus.INTERNAL_SERVER_ERROR,
+                    "Unable to upload files",
+                    e);
+        }
+    }
+
+    @Override
+    public LoginResponse login(LoginRequest request) {
+
+        Authentication authentication =
+                authenticationManager.authenticate(
+                        new UsernamePasswordAuthenticationToken(
+                                request.getEmail(),
+                                request.getPassword()));
+
+        CustomUserDetails userDetails =
+                (CustomUserDetails) authentication.getPrincipal();
+
+        Student student = userDetails.getStudent();
+
+        String token = jwtService.generateToken(userDetails);
+
+        return new LoginResponse(
+                student.getStudentId(),
+                student.getName(),
+                student.getEmail(),
+                student.getRole(),
+                token);
+    }
 }
