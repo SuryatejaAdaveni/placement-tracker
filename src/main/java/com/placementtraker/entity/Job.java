@@ -9,6 +9,7 @@ import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;
@@ -76,7 +77,7 @@ public class Job {
 	private LocalDate applicationDate;
 
 	@JsonIgnore
-	@OneToMany(mappedBy = "job")
+	@OneToMany(mappedBy = "job", cascade =CascadeType.ALL)
 	private List<Application> applications = new ArrayList<>();
 
 	@JsonIgnore
