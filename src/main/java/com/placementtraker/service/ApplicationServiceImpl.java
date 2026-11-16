@@ -24,12 +24,14 @@ public class ApplicationServiceImpl implements ApplicationService {
 	private final ApplicationRepo arepo;
 	private final StudentRepo srepo;
 	private final JobRepo jrepo;
+	private final NotificationService nservice;
 
-	public ApplicationServiceImpl(ApplicationRepo arepo, StudentRepo srepo, JobRepo jrepo) {
+	public ApplicationServiceImpl(ApplicationRepo arepo, StudentRepo srepo, JobRepo jrepo,NotificationService nservice) {
 
 		this.arepo = arepo;
 		this.srepo = srepo;
 		this.jrepo = jrepo;
+		this.nservice = nservice;
 	}
 
 //  student adding and application for the job
@@ -42,20 +44,20 @@ public class ApplicationServiceImpl implements ApplicationService {
 		Job job = jrepo.findById(jobId)
 				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Placement drive not found"));
 
-		// Check duplicate application
-//        if (arepo.existsByJob_IdAndStudent_Id(jobId, studentId)) {
-//            throw new ResponseStatusException(
-//                    HttpStatus.CONFLICT,
-//                    "You have already applied for this job"
-//            );
-//        }
+		
 
 		Application application = new Application();
 
 		application.setStudent(student);
 		application.setJob(job);
 
-		return arepo.save(application);
+		Application savedApplication = arepo.save(application);
+
+		nservice.addStudentApplicationNotification(savedApplication);
+
+		nservice.addStudentApplicationNotificationForStudent(savedApplication);
+
+		return savedApplication;
 	}
 
 	@Override
@@ -118,7 +120,11 @@ public class ApplicationServiceImpl implements ApplicationService {
 		if (forwardingStatus != null) {
 			application.setForwardingStatus(forwardingStatus);
 		}
+		
+		Application updatedApplication = arepo.save(application);
 
-		return arepo.save(application);
+		nservice.addApplicationStatusNotification(updatedApplication);
+
+		return updatedApplication;
 	}
 }

@@ -11,14 +11,20 @@ import com.placementtraker.repo.JobRepo;
 public class JobServiceImpl implements JobService {
 	
 	private final JobRepo jrepo;
+	private final NotificationService nservice;
 	
-	public JobServiceImpl(JobRepo jrepo) {
+	public JobServiceImpl(JobRepo jrepo,NotificationService nservice) {
 		this.jrepo= jrepo;
+		this.nservice = nservice;
 	}
 
 	@Override
 	public Job addJob(Job job) {
-		return jrepo.save(job);
+		Job savedJob = jrepo.save(job);
+
+		nservice.addDriveNotification(savedJob);
+
+	    return savedJob;
 	}
 
 	@Override

@@ -10,24 +10,19 @@ import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.Lob;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
 
 @Entity
 @Setter
@@ -80,13 +75,13 @@ public class Student {
 	private StudentAcademicDetails studentAcademicDetails;
 
 	@JsonManagedReference("student-mockratings")
-	@OneToMany(mappedBy = "student",cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	@OneToMany(mappedBy = "student", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	private List<MockRating> mockRating = new ArrayList<>();
 
 	@JsonIgnore
-	@OneToMany(mappedBy = "student",cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	@OneToMany(mappedBy = "student", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	private List<Application> applications = new ArrayList<>();
-	
+
 	@Column(name = "profile_pic_url", length = 1000)
 	private String profilePicUrl;
 
@@ -101,9 +96,13 @@ public class Student {
 
 	@Column(nullable = false)
 	private boolean verified = false;
-	
+
 	@Column(nullable = false)
 	private String role = "STUDENT";
+	
+	@JsonManagedReference("student-notifications")
+	@OneToMany(mappedBy = "student", cascade = CascadeType.ALL)
+	private List<Notification> notifications = new ArrayList<>();
 
 	@PrePersist
 	public void generateStudentId() {

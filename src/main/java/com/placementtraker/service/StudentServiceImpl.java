@@ -12,6 +12,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import com.placementtraker.dto.LoginRequest;
 import com.placementtraker.dto.LoginResponse;
+import com.placementtraker.entity.Role;
 import com.placementtraker.entity.Student;
 import com.placementtraker.repo.StudentRepo;
 
@@ -23,9 +24,11 @@ public class StudentServiceImpl implements StudentService {
 
 	private final StudentRepo srepo;
 	private final CloudinaryService cloudinaryService;
-	public StudentServiceImpl(StudentRepo studentRepo, CloudinaryService cloudinaryService) {
+	private final NotificationService nservice;
+	public StudentServiceImpl(StudentRepo studentRepo, CloudinaryService cloudinaryService,NotificationService nservice) {
 
 		this.srepo = studentRepo;
+		this.nservice = nservice;
 		this.cloudinaryService = cloudinaryService;
 	}
 
@@ -126,8 +129,11 @@ public class StudentServiceImpl implements StudentService {
 	            student.setProfilePicPublicId((String) profileResult.get("public_id"));
 	        }
 
+	        Student savedStudent = srepo.save(student);
+	        
+	        nservice.addStudentRegistrationNotification(savedStudent);
 
-	        return srepo.save(student);
+	        return savedStudent;
 
 	    } catch (IOException e) {
 	        throw new ResponseStatusException(
