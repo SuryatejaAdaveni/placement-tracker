@@ -47,7 +47,8 @@ public class StudentNotificationController {
 	}
 
 	@DeleteMapping("/delete/{id}")
-	public ResponseEntity<String> deleteNotification(Long id) {
+	public ResponseEntity<String> deleteNotification(@PathVariable Long id) {
+		System.out.println("DELETE NOTIFICATION ENDPOINT HIT: " + id);
 		nservice.deleteNotificationById(id);
 		return new ResponseEntity<>("Notification Deleted Successfully",HttpStatus.ACCEPTED);
 	}

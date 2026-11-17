@@ -36,7 +36,6 @@ import lombok.Setter;
 public class Job {
 
 	
-
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;

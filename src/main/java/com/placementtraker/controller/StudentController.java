@@ -13,7 +13,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.placementtraker.entity.Job;
 import com.placementtraker.entity.Student;
+import com.placementtraker.service.JobService;
 import com.placementtraker.service.StudentService;
 
 import jakarta.validation.Valid;
@@ -23,9 +25,11 @@ import jakarta.validation.Valid;
 public class StudentController {
 
 	private final StudentService sservice;
+	private final JobService jservice;
 
-	public StudentController(StudentService sservice) {
-	    this.sservice = sservice;
+	public StudentController(StudentService sservice, JobService jservice) {
+		this.sservice = sservice;
+		this.jservice = jservice;
 	}
 
 
@@ -56,5 +60,11 @@ public class StudentController {
 	public ResponseEntity<String> deleteStudentById(@PathVariable String id) {
 		sservice.deleteStudentById(id);
 		return new ResponseEntity<>("Student Deleted Successfully", HttpStatus.ACCEPTED);
+	}
+	
+	@GetMapping("/drives")
+	public ResponseEntity<List<Job>> getAllJobs() {
+		List<Job> jobs = jservice.getAllJobs();
+		return ResponseEntity.ok(jobs);
 	}
 }
